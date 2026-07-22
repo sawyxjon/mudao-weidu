@@ -1,0 +1,42 @@
+[
+ {
+  "id": "williamson",
+  "title": "从伊甸乐园到荣耀天堂",
+  "author": "威廉森",
+  "page_count": 256,
+  "cover": "covers/williamson.jpg",
+  "cover_local": "cover_williamson.jpg"
+ },
+ {
+  "id": "owen",
+  "title": "基督的荣耀",
+  "author": "约翰·欧文",
+  "page_count": 80,
+  "cover": "covers/owen.jpg",
+  "cover_local": "cover_owen.jpg"
+ },
+ {
+  "id": "keller",
+  "title": "婚姻的意义",
+  "author": "提摩太·凯勒",
+  "page_count": 309,
+  "cover": "covers/keller.jpg",
+  "cover_local": "cover_keller.jpg"
+ },
+ {
+  "id": "carson",
+  "title": "护教当代手册",
+  "author": "贾斯乐/布鲁克",
+  "page_count": 417,
+  "cover": "covers/carson.jpg",
+  "cover_local": "cover_carson.jpg"
+ },
+ {
+  "id": "tertullian",
+  "title": "护教篇",
+  "author": "德尔图良",
+  "page_count": 210,
+  "cover": "covers/tertullian.jpg",
+  "cover_local": "cover_tertullian.jpg"
+ }
+]
