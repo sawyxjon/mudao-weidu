@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>沐道微读 APP 下载</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(135deg, #8B7355 0%, #A0522D 100%);
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; padding: 24px; color: #fff;
+  }
+  .card {
+    background: rgba(255,255,255,0.12); backdrop-filter: blur(10px);
+    border-radius: 20px; padding: 32px 28px; max-width: 360px; width: 100%;
+    text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  }
+  .fish { font-size: 56px; margin-bottom: 12px; }
+  h1 { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+  .sub { font-size: 14px; opacity: 0.85; margin-bottom: 24px; }
+  .btn {
+    display: inline-block; width: 100%; padding: 16px; border-radius: 12px;
+    background: #fff; color: #8B7355; font-size: 17px; font-weight: 700;
+    text-decoration: none; border: none; cursor: pointer; transition: transform .1s;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn.disabled { opacity: 0.6; pointer-events: none; }
+  .progress { margin-top: 16px; font-size: 13px; opacity: 0.9; min-height: 20px; }
+  .bar { margin-top: 10px; height: 6px; background: rgba(255,255,255,0.25); border-radius: 3px; overflow: hidden; display: none; }
+  .bar > div { height: 100%; width: 0; background: #fff; transition: width .2s; }
+  .tip { margin-top: 18px; font-size: 12px; opacity: 0.7; line-height: 1.6; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="fish">🐟📖</div>
+    <h1>沐道微读</h1>
+    <div class="sub">基督教读书 APP · 离线阅读</div>
+    <button class="btn" id="dlBtn" onclick="startDownload()">点击下载 APP（约 21MB）</button>
+    <div class="progress" id="progress">如未自动下载，请点击上方按钮</div>
+    <div class="bar" id="bar"><div></div></div>
+    <div class="tip">下载完成后，在手机文件管理器中找到<br>「沐道微读.apk」点击安装即可<br>（首次安装需允许"未知来源"）<br><br>📚 书架仅含封面，点哪本书即在线加载该书</div>
+  </div>
+
+<script>
+const APK_URL = 'mudao-weidu.apk';  // 英文名的 apk，服务器返回 text/html 但 body 是二进制
+const APK_NAME = '沐道微读.apk';
+
+function startDownload() {
+  const btn = document.getElementById('dlBtn');
+  const prog = document.getElementById('progress');
+  const bar = document.getElementById('bar');
+  const barFill = bar.firstElementChild;
+  btn.classList.add('disabled');
+  bar.style.display = 'block';
+  prog.textContent = '正在下载…';
+
+  // 用 xhr 流式读取（比 fetch 流式在 Content-Length:0 场景下更稳）
+  const xhr = new XMLHttpRequest();
+  xhr.open('GET', APK_URL, true);
+  xhr.responseType = 'arraybuffer';
+  let lastPct = -1;
+  xhr.onprogress = (e) => {
+    if (e.lengthComputable && e.total > 0) {
+      const pct = Math.round(e.loaded / e.total * 100);
+      if (pct !== lastPct) { barFill.style.width = pct + '%'; lastPct = pct; }
+      prog.textContent = '正在下载… ' + Math.round(e.loaded / 1048576 * 10) / 10 + ' MB';
+    } else {
+      prog.textContent = '正在下载… ' + Math.round(e.loaded / 1048576 * 10) / 10 + ' MB';
+    }
+  };
+  xhr.onload = () => {
+    if (xhr.status === 200 && xhr.response && xhr.response.byteLength > 1000000) {
+      const blob = new Blob([xhr.response], { type: 'application/vnd.android.package-archive' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = APK_NAME;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
+      prog.textContent = '下载完成！请在下载管理中找到「沐道微读.apk」安装 📲';
+      btn.classList.remove('disabled');
+    } else {
+      prog.textContent = '下载失败（服务器未返回完整文件），请改用电脑传手机安装';
+      btn.classList.remove('disabled');
+    }
+  };
+  xhr.onerror = () => {
+    prog.textContent = '网络错误，请重试或改用电脑传手机安装';
+    btn.classList.remove('disabled');
+  };
+  xhr.send();
+}
+
+// 页面加载后自动尝试下载（部分浏览器需用户交互才允许，失败则提示点击）
+window.addEventListener('load', () => {
+  // iOS 等不支持自动下载，直接等用户点
+  const ua = navigator.userAgent;
+  if (/iPhone|iPad|iPod/i.test(ua)) {
+    document.getElementById('progress').textContent = '苹果手机不支持直接安装安卓 APP';
+  }
+});
+</script>
+</body>
+</html>
